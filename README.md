@@ -8,40 +8,53 @@ Este projeto está autorizado a operar **somente** no Supabase:
 
 - Nome: **RM NEGOCIO IMOBILIARIO**
 - Project ref: `uwzfgksmnqgaxtscwxow`
-- URL: `https://uwzfgksmnqgaxtscwxow.supabase.co`
+- URL fixa no workflow: `https://uwzfgksmnqgaxtscwxow.supabase.co`
 
-O node **Validar Projeto Supabase** interrompe o fluxo quando `SUPABASE_URL` não contém esse project ref. O fluxo usa somente:
+O fluxo usa exclusivamente estas tabelas dedicadas:
 
 - `ia_contatos_imobiliaria`
 - `ia_memoria_imobiliaria`
 - `ia_mensagens_imobiliaria`
 
-Nenhuma tabela dos outros projetos é usada ou modificada.
+Todos os requests REST apontam diretamente para o project ref autorizado. A credencial Supabase já existente no n8n é reutilizada apenas para autenticação. Se a credencial não pertencer a esse projeto, a requisição falha sem redirecionar dados para outro Supabase.
+
+## Atendimento com quatro agentes
+
+1. Terrenos e loteamentos
+2. Casas, sobrados e geminados
+3. Apartamentos na planta e lançamentos
+4. Imóveis usados e prontos
+
+A triagem identifica o segmento, mantém o histórico, evita repetir perguntas e prioriza a coleta progressiva de documentos para análise de crédito e seleção de imóveis compatíveis com renda, entrada, FGTS, localização e objetivo do cliente.
+
+## Credenciais reutilizadas
+
+O workflow mantém as referências das credenciais já existentes na mesma instalação do n8n:
+
+- `OpenAI account 2`
+- `Supabase account`
+
+A rota do webhook foi preservada como `whatsapp-imob` para evitar reconfigurar a Evolution API.
+
+O repositório é público. Por segurança, a versão publicada no GitHub **não contém o valor bruto da chave da Evolution API nem URLs assinadas de arquivos**. A versão de importação direta, gerada para uso no mesmo n8n, pode manter esses dados somente no arquivo entregue ao responsável pelo projeto.
 
 ## Arquivos
 
-- `n8n/workflow-rm-imobiliario-4-agentes.json`: fluxo pronto para importar.
-- `prompts/PROMPT_MASTER_RM_IMOBILIARIO.md`: prompts completos e regras.
-- `.env.example`: variáveis necessárias, sem segredos.
+- `n8n/workflow-rm-imobiliario-4-agentes.json`: versão pública sem segredos.
+- `n8n/source/workflow-rm-imobiliario-4-agentes.json.gz.b64`: fonte compactada validada.
+- `prompts/PROMPT_MASTER_RM_IMOBILIARIO.md`: regras dos agentes.
 
 ## Atualização automática no GitHub
 
-A fonte validada do workflow fica em `n8n/source/workflow-rm-imobiliario-4-agentes.json.gz.b64`. Sempre que essa fonte, o gerador ou a automação for atualizado na branch `main`, o GitHub Actions executa `n8n/build-workflow.mjs`, valida o JSON e publica automaticamente o arquivo final em `n8n/workflow-rm-imobiliario-4-agentes.json`.
+Sempre que a fonte, o gerador ou a automação for alterada na branch `main`, o GitHub Actions executa `n8n/build-workflow.mjs`, valida o JSON e publica o arquivo final em `n8n/workflow-rm-imobiliario-4-agentes.json`.
 
-## Configuração no n8n
+## Testes antes de ativar
 
-1. Importe o JSON.
-2. Configure a credencial OpenAI nos nodes de modelo, transcrição, imagem e PDF.
-3. Cadastre as variáveis do `.env.example` no ambiente do n8n/Hostinger.
-4. Confirme que `SUPABASE_URL` é exatamente `https://uwzfgksmnqgaxtscwxow.supabase.co`.
-5. Configure o webhook na Evolution API.
-6. Teste texto, áudio, foto de documento, PDF, pedido de atendimento humano e retorno de cliente já atendido.
-7. Ative o workflow somente após os testes.
+1. Desative o workflow antigo para evitar conflito no webhook `whatsapp-imob`.
+2. Importe a versão direta no mesmo n8n onde as credenciais já existem.
+3. Teste texto, áudio, imagem, PDF, documento de titular e cônjuge, retorno de cliente, pedido de atendimento humano e mídia do Frankfurt.
+4. Ative o novo workflow somente após concluir os testes.
 
-## Segurança
+## Segurança documental
 
-O arquivo original continha uma chave da Evolution API e URLs assinadas diretamente no fluxo. A versão revisada não contém chaves, tokens, service role, URLs assinadas ou números privados. Revogue a chave antiga exposta e crie uma nova antes de ativar o fluxo.
-
-## Funcionamento documental
-
-O fluxo identifica o tipo de documento sem repetir números sensíveis, registra o documento recebido na memória do cliente e orienta o agente a solicitar apenas a próxima pendência. Em caso de casal ou composição de renda, a documentação é controlada por pessoa.
+O fluxo identifica o tipo de documento sem repetir CPF, RG, conta, assinatura ou outros números sensíveis. O documento é associado ao titular, cônjuge ou compositor somente quando houver evidência; se estiver ilegível, o agente solicita apenas o reenvio necessário.
