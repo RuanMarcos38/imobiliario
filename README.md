@@ -24,6 +24,10 @@ Nenhuma tabela dos outros projetos é usada ou modificada.
 - `prompts/PROMPT_MASTER_RM_IMOBILIARIO.md`: prompts completos e regras.
 - `.env.example`: variáveis necessárias, sem segredos.
 
+## Atualização automática no GitHub
+
+A fonte validada do workflow fica em `n8n/source/workflow-rm-imobiliario-4-agentes.json.gz.b64`. Sempre que essa fonte, o gerador ou a automação for atualizado na branch `main`, o GitHub Actions executa `n8n/build-workflow.mjs`, valida o JSON e publica automaticamente o arquivo final em `n8n/workflow-rm-imobiliario-4-agentes.json`.
+
 ## Configuração no n8n
 
 1. Importe o JSON.
